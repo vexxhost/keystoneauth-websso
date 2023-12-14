@@ -1,0 +1,37 @@
+*.pyc
+*.sw?
+*.egg/
+vendor
+.ksl-venv
+.venv
+.update-venv/
+.tox
+keystone.egg-info/
+*.log
+.coverage
+coverage.xml
+cover/*
+covhtml
+pep8.txt
+nosetests.xml
+doc/build
+.DS_Store
+doc/source/api
+doc/source/modules.rst
+ChangeLog
+AUTHORS
+build/
+dist/
+etc/keystone.conf
+etc/logging.conf
+etc/keystone/
+keystone/tests/tmp/
+.project
+.pydevproject
+keystone/locale/*/LC_MESSAGES/*.mo
+.testrepository/
+*.db
+# Files created by releasenotes build
+releasenotes/build
+# sample config included in docs
+doc/source/_static/keystone.conf.sample
