@@ -272,7 +272,7 @@ class OpenIDConnect(oidc._OidcBase):
             cookies = self._get_session_cookies(location)
             response = self._get_keystone_token(session, cookies)
             self.auth_ref = access.create(resp=response)
-            self.set_auth_state(self.auth_ref._data)
+            self.set_auth_state(self.auth_ref.auth_token)
         else:
             self.set_auth_state(cached_data)
 
