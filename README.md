@@ -61,7 +61,10 @@ provider.
 #### 2. Add to stackrc file
 
 ```bash
-export OS_AUTH_TYPE v3openid
+export OS_AUTH_TYPE=v3openid
+export OS_AUTH_URL=https://keystone.example.org:5000/v3
+export OS_IDENTITY_PROVIDER='<keystone-identity-provider>'
+export OS_PROTOCOL=openid
 
 ```
 
@@ -71,7 +74,7 @@ export OS_AUTH_TYPE v3openid
 clouds:
     my_cloud:
         auth_type: v3openid
-        auth_url: https://keystone.example.org/v3
+        auth_url: https://keystone.example.org:5000/v3
         identity_provider: <keystone-identity-provider>
         protocol: openid
 ```
@@ -93,6 +96,15 @@ If domain specific configs are enabled on the server then this section needs to 
 [openid]
 claim_prefix = OIDC-
 remote_id_attribute = OIDC-sub
+
+```
+
+Also, http://localhost:9990 needs to be added as a "Trusted Dashboard"
+
+```ini
+[federation]
+trusted_dashboard=http://your-horizon-dashboard/auth/websso/
+trusted_dashboard=http://localhost:9990
 
 ```
 
