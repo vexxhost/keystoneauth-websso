@@ -72,7 +72,8 @@ clouds:
     my_cloud:
         auth_type: v3openid
         auth_url: https://keystone.example.org/v3
-        identity_provider:
+        identity_provider: <keystone-identity-provider>
+        protocol: openid
 ```
 
 invoke using
@@ -86,7 +87,7 @@ keystone configuration consists of the keystone.conf (as well as any domain-spec
 
 ### Configure /etc/keystone/keystone.conf
 
-If domain specific configs are enabled on the server
+If domain specific configs are enabled on the server then this section needs to be added to each OpenID enabled domain
 
 ```ini
 [openid]
@@ -98,7 +99,7 @@ remote_id_attribute = OIDC-sub
 ### Configure wsgi-keystone.conf
 
 there are 4 required "protected" location that need to be created.
-1. 1 Global redirect URL
+* 1 Global redirect URL
 
 ```xml
 <Location /v3/auth/OS-FEDERATION/identity_providers/redirect>
@@ -107,7 +108,7 @@ there are 4 required "protected" location that need to be created.
 </Location>
 ```
 
-1. 2 Location that is used for websso callback template
+* 2 Location that is used for websso callback template
 
 ```xml
 
@@ -115,9 +116,24 @@ there are 4 required "protected" location that need to be created.
     Require valid-user
     AuthType openid-connect
 </Location>
+
+<Location /v3/auth/OS-FEDERATION/websso/openid>
+    Require valid-user
+    AuthType openid-connect
+</Location>
+```
+The protected location `/v3/auth/OS-FEDERATION/identity_providers/<IDP-name>/protocols/openid/websso` is specific for the desired target OpenStack Keystone Identity Provider
+
+Using the admin stackrc file you can get a list of idenity providers:
+```
+openstack identity provider list
 ```
 
-1. 1 Location for auth requests
+The protected location `/v3/auth/OS-FEDERATION/websso/openid` is for generic callback for WebSSO
+
+See [callback_template](https://docs.openstack.org/keystone/latest/admin/federation/configure_federation.html#add-the-callback-template-websso) for more information
+
+* 1 Location for auth requests
 
 ```xml
 <Location /v3/OS-FEDERATION/identity_providers/<IDP-name>/protocols/openid/auth>
