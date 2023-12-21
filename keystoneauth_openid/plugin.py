@@ -19,7 +19,6 @@ import socket
 import webbrowser
 import os
 import json
-from urllib.parse import urlparse, parse_qs
 from keystoneauth1 import _utils as utils
 from keystoneauth1 import access
 from keystoneauth1.identity.v3 import oidc
