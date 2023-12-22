@@ -269,13 +269,16 @@ class OpenIDConnect(oidc._OidcBase):
         auth_response = session.get(self.auth_url + '/auth/tokens',
                                      headers=headers,
                                      authenticated=False)
+        breakpoint()
         return auth_response
 
     def get_payload(self, session):
         return super().get_payload(session)
 
+    def _token_expired(self):
+        return True
+
     def get_unscoped_auth_ref(self, session):
-    # def get_auth_ref(self, session):
         """Authenticate with OpenID Connect and get back claims.
 
         This is a multi-step process:
