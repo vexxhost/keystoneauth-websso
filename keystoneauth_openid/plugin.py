@@ -26,6 +26,7 @@ from positional import positional
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from keystoneauth_openid import exceptions
 import cgi
+from datetime import datetime
 
 _logger = utils.get_logger(__name__)
 
@@ -182,21 +183,6 @@ class OpenIDConnect(oidc._OidcBase):
                                               self.redirect_port)
 
     @property
-    def federated_auth_url(self):
-        """Full URL where authorization data is sent."""
-        values = {
-            'host': self.auth_url.rstrip('/'),
-            'identity_provider': self.identity_provider,
-            'protocol': self.protocol
-        }
-        url = ("%(host)s/OS-FEDERATION/identity_providers/"
-               "%(identity_provider)s/protocols/%(protocol)s/auth")
-
-        url = url % values
-
-        return url
-
-    @property
     def federated_token_url(self):
         """Full URL where authorization data is sent."""
         host = self.auth_url.rstrip('/')
@@ -269,14 +255,10 @@ class OpenIDConnect(oidc._OidcBase):
         auth_response = session.get(self.auth_url + '/auth/tokens',
                                      headers=headers,
                                      authenticated=False)
-        breakpoint()
         return auth_response
 
     def get_payload(self, session):
         return super().get_payload(session)
-
-    def _token_expired(self):
-        return True
 
     def get_unscoped_auth_ref(self, session):
         """Authenticate with OpenID Connect and get back claims.
