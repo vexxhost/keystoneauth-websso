@@ -153,7 +153,7 @@ class OpenIDConnect(oidc._OidcBase):
                  client_id='keystone', client_secret='dummy',
                  access_token_type='access_token',
                  redirect_host="localhost", redirect_port=9990,
-                 cache_path=os.environ.get('HOME') + '/.cache/keystone_cache',
+                 cache_path=os.environ.get('HOME') + '/.cache/',
                  **kwargs):
         """The OpenID Connect plugin expects the following arguments.
 
@@ -315,7 +315,13 @@ class OpenIDConnect(oidc._OidcBase):
         return self.auth_ref
 
     def set_auth_state(self, data):
+        """Set the current authentication state and store in a cache file
+        :param   data - token information needed to pass into access.create
+        :type
 
+        :returns object that represents current session
+        :rtype  :py:class:`keystoneauth1.access.AccessInfoV3`
+        """
         if 'body' in data:
             jdata = data
         else:
@@ -323,17 +329,53 @@ class OpenIDConnect(oidc._OidcBase):
                     'body': self.auth_ref._data}
 
             jdata = json.dumps(data)
-
-        with open(self.cache_path, 'w', encoding='utf-8') as f:
+        cache_path = self._get_session_cache()
+        with open(cache_path, 'w', encoding='utf-8') as f:
             json.dump(jdata, f)
 
         return super().set_auth_state(jdata)
 
-
     def get_auth_state(self):
-        # TODO: Check expiration
-        if os.path.exists(self.cache_path):
-            with open(self.cache_path, 'r', encoding='utf-8') as f:
+        """Retrieve the current authentication state from local cache
+
+        :returns string that can be stored or None if there is no auth
+                 present in the cache file.
+        :rtype: str of None is no auth is valid
+        """
+        cache_path = self._get_session_cache()
+
+        if os.path.exists(cache_path):
+            with open(cache_path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-            return data
+            if not self._token_expired(data):
+                return data
         return super().get_auth_state()
+
+    def _get_session_cache(self):
+        """Retrieve the location of the session cache
+
+       :returns a string of the path for the appropriate cache file
+        """
+        if self.project_domain_id:
+            return self.cache_path + self.project_id + self.project_domain_id
+        else:
+            return self.cache_path + 'unscopped_token'
+
+    def _token_expired(self, data):
+        """Check to see if the token is expired
+
+        Args:
+            data (str): expiration date from current token cache
+
+        :returns True or False
+        :rtype   bool
+        """
+        _data = json.loads(data)
+
+        expiration = datetime.strptime(_data['body']['token']['expires_at'],
+                                       "%Y-%m-%dT%H:%M:%S.%fZ")
+        now = datetime.now()
+        if expiration < now:
+            return True
+        else:
+            return False
