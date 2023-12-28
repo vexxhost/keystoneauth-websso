@@ -4,6 +4,4 @@
 
 # All additions to this file must have significant justification.
 
-positional>=1.1.1
-
-keystoneauth1>=2.10.0
+keystoneauth1>=5.4.0

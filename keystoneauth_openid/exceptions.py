@@ -26,5 +26,5 @@ class OidcAuthorizationEndpointNotFound(exceptions.AuthPluginException):
     message = "OpenID Connect authorization endpoint not provided."
 
 
-class MissingOidcSessionHeaders(exceptions.AuthPluginException):
-    message = "Could not get the mod_auth_openid session cookies."
+class MissingToken(exceptions.AuthPluginException):
+    message = "Could not get the token."

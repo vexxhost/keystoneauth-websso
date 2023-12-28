@@ -15,21 +15,20 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import cgi
+import json
+import os
 import socket
 import webbrowser
-import os
-import json
+import re
+
 from keystoneauth1 import _utils as utils
-from keystoneauth1 import access
-from keystoneauth1.identity.v3 import oidc
-from positional import positional
+from keystoneauth1.identity.v3 import federation
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from keystoneauth_openid import exceptions
-import cgi
 from datetime import datetime
 
 _logger = utils.get_logger(__name__)
-
 
 class _ClientCallbackServer(HTTPServer):
     """HTTP server to handle the OpenID Connect callback to localhost.
@@ -50,7 +49,6 @@ class _ClientCallbackServer(HTTPServer):
         # object as an ancestor
         HTTPServer.server_bind(self)
         self.socket.settimeout(60)
-
 
 class _ClientCallbackHandler(BaseHTTPRequestHandler):
     """HTTP request handler for the OpenID Connect redirect callback.
@@ -80,7 +78,6 @@ class _ClientCallbackHandler(BaseHTTPRequestHandler):
                             'CONTENT_TYPE': self.headers['Content-Type'],
                             })
 
-
             self.send_response(200)
             self.send_header("Content-type", "text/html")
             self.end_headers()
@@ -92,15 +89,9 @@ class _ClientCallbackHandler(BaseHTTPRequestHandler):
 
             for field in form.keys():
                 field_item = form[field]
-                if field_item.filename:
-                    file_data = field_item.file.read()
-                    file_len = len(file_data)
-                    del file_data
-                    response = '\tUploaded {} as {!r} ({} bytes\n'.format(field, field_item.filename, file_len)
-                else:
+                if not field_item.filename:
                     # Regular Form Value
                     postvars[field] = form[field].value
-                    response = '\t{}={}\n'.format(field, form[field].value)
 
             self.server.token = postvars['token']
         else:
@@ -114,7 +105,7 @@ class _ClientCallbackHandler(BaseHTTPRequestHandler):
                 b"</body></html>")
 
 def _wait_for_token(redirect_host, redirect_port):
-    """Spawn an HTTP server and wait for the auth id_token.
+    """Spawn an HTTP server and wait for the auth_token.
 
     :param redirect_host: The hostname where the authorization request will
                             be redirected. This normally is localhost. This
@@ -144,15 +135,11 @@ def _wait_for_token(redirect_host, redirect_port):
     if httpd.token:
         return httpd.token
     else:
-        raise exceptions.MissingOidcSessionHeaders
+        raise exceptions.MissingToken
 
-
-class OpenIDConnect(oidc._OidcBase):
+class OpenIDConnect(federation.FederationBaseAuth):
     """Implementation for OpenID Connect authentication."""
-    @positional(3)
     def __init__(self, auth_url, identity_provider, protocol,
-                 client_id='keystone', client_secret='dummy',
-                 access_token_type='access_token',
                  redirect_host="localhost", redirect_port=9990,
                  cache_path=os.environ.get('HOME') + '/.cache/',
                  **kwargs):
@@ -169,22 +156,16 @@ class OpenIDConnect(oidc._OidcBase):
                               callback http server will bind to.
         :type redirect_port: int
         """
-        super(OpenIDConnect, self).__init__(auth_url, identity_provider, protocol,
-                                            client_id, client_secret,
-                                            access_token_type, cache_path,
-                                            **kwargs)
+        super(OpenIDConnect, self).__init__(auth_url, identity_provider, protocol, **kwargs)
         self.cache_path = cache_path
-        self.client_id = client_id
-        self.client_secret = client_secret
-        self.access_token_type = access_token_type
         self.redirect_host = redirect_host
         self.redirect_port = int(redirect_port)
-        self.redirect_uri = "http://%s:%s" % (self.redirect_host,
+        self.redirect_uri = "http://%s:%s/auth/websso/" % (self.redirect_host,
                                               self.redirect_port)
 
     @property
     def federated_token_url(self):
-        """Full URL where authorization data is sent."""
+        """URL where websso auth flow is started."""
         host = self.auth_url.rstrip('/')
         if not host.endswith('v3'):
             host += '/v3'
@@ -199,78 +180,47 @@ class OpenIDConnect(oidc._OidcBase):
 
         return url
 
-    def get_redirect_location(self, session):
-        """Start the authentication session with keystone so we get session
-        cookies since we will need to do an out-of-band auth process
+    def _get_auth_token(self):
+        """Spawn a browser session to start the authentication process. The
+        user will be redirected to identity provider to sign in.  Then a token
+        will be generated and returned.
+
+        :returns auth_token
+        """
+        webbrowser.open(self.federated_token_url + "?origin=" + self.redirect_uri, new=0)
+
+        return _wait_for_token(self.redirect_host, self.redirect_port)
+
+    def _get_token_metadata(self, session, auth_token):
+        """Use the keystone auth_token to get the token metadata such as expiresAt
 
         :param obj session: keystoneauth1.session.Session
-
-        :returns:   location - where usere will enter their credentials
-                    cookie - specifically need the auth_session_id
-        """
-        location = None
-        # We need to initiate the first request without following redirects so we can get the needed
-        # login page to use in the webbrowser session
-        response = session.get(self.federated_token_url + "?origin=" + self.redirect_uri,
-                                    redirect=False,
-                                     authenticated=False,)
-        location = response.headers["Location"] # redirects back to keystone before redirecting local
-
-        return location
-
-    def _get_access_token(self, location):
-        """Spawn a browser session to continue the authentication process. The
-
-        The response we get from keystone is used to create our access token
-        keystoneauth1.access.access.create()
-
-        :param str login_page: the URI from the `location` header of the
-                                keystone redirect
-
-        :returns access_token and session cookies in the headers
-        """
-        webbrowser.open(location, new=0)
-        # Since we initiated the auth request via Keystone we will have the
-        # OIDC session cookies in the headers from mod_auth_openidc.  We need
-        # to complete the authentication to get the keystone token
-
-        token = _wait_for_token(self.redirect_host, self.redirect_port)
-        return token
-
-
-    def _get_keystone_token(self, session, token):
-        """Exchange the access_token for a keystone token
-
-        :param obj session: keystoneauth1.session.Session
-        :param str token: the token headers containing the mod_auth_openidc
-                            session that was completed in the previous step.
+        :param str auth_token: the auth_token
 
         Returns:
-            auth_response: response to a GET that includes keystone token
+            auth_response: response to a GET that includes keystone token metadata
         """
 
-        headers = {'X-Auth-Token': token,
-            'X-Subject-Token': token}
+        headers = {'X-Auth-Token': auth_token,
+            'X-Subject-Token': auth_token}
 
-        auth_response = session.get(self.auth_url + '/auth/tokens',
-                                     headers=headers,
-                                     authenticated=False)
-        return auth_response
-
-    def get_payload(self, session):
-        return super().get_payload(session)
+        return session.get(self.auth_url + '/auth/tokens', headers=headers, authenticated=False)
 
     def get_unscoped_auth_ref(self, session):
-        """Authenticate with OpenID Connect and get back claims.
+        """Authenticate with OpenID Connect Identity Provider.
 
         This is a multi-step process:
 
-        1.- We need to establish the login page to open an browser to complete
-            a full openID session and retrieve an access_token from keystone.
+        1. Send user to a webbrowser to authenticate. User will be redirected to a 
+           local webserver so a auth_token can be captured
 
-        2.- Use this access_token to obtain our keystone token
+        2. Use the auth_token to get additional token metadata
 
-        3.- Pass the token response to the session.create() to esablish our session
+        3. Cache token data and use set_auth_state method to set an auth_ref
+           to be used to get an rescoped token based on user settings
+
+        Note: Cache filename is based on auth_url and identity_provider only
+        as an unscoped token can then be cached for the user.
 
         :param session: a session object to send out HTTP requests.
         :type session: keystoneauth1.session.Session
@@ -278,70 +228,52 @@ class OpenIDConnect(oidc._OidcBase):
         :returns: a token data representation
         :rtype: :py:class:`keystoneauth1.access.AccessInfoV3`
         """
-        cached_data = self.get_auth_state()
-        if  cached_data is None:
-            # We need to initiate the auth to keystone to get the location header
-            # in order to spawn our web browser.
-            location = self.get_redirect_location(session)
-            # Now obtain the access token from the OIDC provider
-            cookies = self._get_access_token(location) # rename to tokens
+        cached_data = self.get_cached_data()
 
-            response = self._get_keystone_token(session, cookies)
-
-            self.auth_ref = access.create(resp=response)
-
-            self.set_auth_state(self.auth_ref.auth_token)
-        else:
+        if cached_data:
             self.set_auth_state(cached_data)
+
+        if self.auth_ref is None:
+            # Start Auth Process and get Keystone Auth Token
+            auth_token = self._get_auth_token()
+
+            # Use auth token to get token metadata
+            response = self._get_token_metadata(session, auth_token)
+
+            # Cache token and token metadata
+            data = json.dumps({"auth_token": auth_token, "body": response.json()})
+            self.put_cached_data(data)
+
+            # Set auth_ref
+            self.set_auth_state(data)
 
         return self.auth_ref
 
-    def set_auth_state(self, data):
-        """Set the current authentication state and store in a cache file
-        :param   data - token information needed to pass into access.create
-        :type
-
-        :returns object that represents current session
-        :rtype  :py:class:`keystoneauth1.access.AccessInfoV3`
-        """
-        if 'body' in data:
-            jdata = data
-        else:
-            data = {'auth_token': data,
-                    'body': self.auth_ref._data}
-
-            jdata = json.dumps(data)
-        cache_path = self._get_session_cache()
-        with open(cache_path, 'w', encoding='utf-8') as f:
-            json.dump(jdata, f)
-
-        return super().set_auth_state(jdata)
-
-    def get_auth_state(self):
-        """Retrieve the current authentication state from local cache
-
-        :returns string that can be stored or None if there is no auth
-                 present in the cache file.
-        :rtype: str of None is no auth is valid
-        """
-        cache_path = self._get_session_cache()
+    def get_cached_data(self):
+        """Get cached token"""
+        cache_path = self._get_cache_path()
 
         if os.path.exists(cache_path):
             with open(cache_path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
             if not self._token_expired(data):
                 return data
-        return super().get_auth_state()
 
-    def _get_session_cache(self):
+    def put_cached_data(self, data):
+        """Write cache data to file"""
+        with open(self._get_cache_path(), 'w', encoding='utf-8') as f:
+            json.dump(data, f)
+
+    def _get_cache_path(self):
         """Retrieve the location of the session cache
 
-       :returns a string of the path for the appropriate cache file
+        :returns a string of the path for the appropriate cache file
         """
-        if self.project_domain_id:
-            return self.cache_path + self.project_id + self.project_domain_id
-        else:
-            return self.cache_path + 'unscopped_token'
+        return self.cache_path + self.get_cache_id()
+
+    def get_cache_id(self):
+        """slugifys the auth_url and identity provider for use as cache filename"""
+        return 'os-' + re.sub('[^A-Za-z0-9-]+', '-', self.auth_url + '-' + self.identity_provider)
 
     def _token_expired(self, data):
         """Check to see if the token is expired

@@ -53,7 +53,7 @@ provider.
             --os-identity-provider <identity-provider> \
             --os-protocol <protocol> \
             --os-project-name <project> \
-            --os-project-domain-id <project-domain> \
+            --os-project-domain-name <project-domain> \
             --os-identity-api-version 3 \
             --os-openid-scope "openid profile email" \
             token issue
@@ -70,14 +70,30 @@ export OS_PROTOCOL=openid
 
 ### 3. Add to clouds.yml
 
-```yaml
-clouds:
-    my_cloud:
-        auth_type: v3openid
-        auth_url: https://keystone.example.org:5000/v3
-        identity_provider: <keystone-identity-provider>
-        protocol: openid
-```
+- Unscoped token:
+
+    ```yaml
+    clouds:
+        my_cloud:
+            auth_type: v3openid
+            auth_url: https://keystone.example.org:5000/v3
+            identity_provider: <keystone-identity-provider>
+            protocol: openid
+    ```
+
+- Scoped token:
+
+    ```yaml
+    clouds:
+        my_cloud:
+            auth_type: v3openid
+            auth_url: https://keystone.example.org:5000/v3
+            identity_provider: <keystone-identity-provider>
+            protocol: openid
+            auth:
+                project_name: <project-name>
+                project_domain_name: <domain-name>
+    ```
 
 invoke using
 ```
@@ -104,55 +120,33 @@ Also, http://localhost:9990 needs to be added as a "Trusted Dashboard"
 ```ini
 [federation]
 trusted_dashboard=http://your-horizon-dashboard/auth/websso/
-trusted_dashboard=http://localhost:9990
+trusted_dashboard=http://localhost:9990/auth/websso/
 
 ```
 
 ### Configure wsgi-keystone.conf
 
-there are 4 required "protected" location that need to be created.
+There are 2 required "protected" Locations that need to be created.
+
 * 1 Global redirect URL
 
-```xml
-<Location /v3/auth/OS-FEDERATION/identity_providers/redirect>
-    AuthType openid-connect
-    Require valid-user
-</Location>
-```
+    ```xml
+    <Location /v3/auth/OS-FEDERATION/identity_providers/redirect>
+        AuthType openid-connect
+        Require valid-user
+    </Location>
+    ```
 
-* 2 Location that is used for websso callback template
+* 1 Location that is used for websso authentication. This is specific to the target OpenStack Keystone Identity Provider. See [callback_template](https://docs.openstack.org/keystone/latest/admin/federation/configure_federation.html#add-the-callback-template-websso) for more information
 
-```xml
+    ```xml
+    <Location /v3/auth/OS-FEDERATION/identity_providers/<IDP-name>/protocols/openid/websso>
+        Require valid-user
+        AuthType openid-connect
+        OIDCDiscoverURL http://localhost:15000/v3/auth/OS-FEDERATION/identity_providers/redirect?iss=<url-encoded-issuer>
+    </Location>
+    ```
 
-<Location /v3/auth/OS-FEDERATION/identity_providers/<IDP-name>/protocols/openid/websso>
-    Require valid-user
-    AuthType openid-connect
-</Location>
 
-<Location /v3/auth/OS-FEDERATION/websso/openid>
-    Require valid-user
-    AuthType openid-connect
-</Location>
-```
-The protected location `/v3/auth/OS-FEDERATION/identity_providers/<IDP-name>/protocols/openid/websso` is specific for the desired target OpenStack Keystone Identity Provider
-
-Using the admin stackrc file you can get a list of idenity providers:
-```
-openstack identity provider list
-```
-
-The protected location `/v3/auth/OS-FEDERATION/websso/openid` is for generic callback for WebSSO
-
-See [callback_template](https://docs.openstack.org/keystone/latest/admin/federation/configure_federation.html#add-the-callback-template-websso) for more information
-
-* 1 Location for auth requests
-
-```xml
-<Location /v3/OS-FEDERATION/identity_providers/<IDP-name>/protocols/openid/auth>
-    Require valid-user
-    AuthType openid-connect
-</Location>
-```
-
-For detailed configuration
+For detailed configuration of mod_auth_oidc with Keycloak, see:
 https://github.com/OpenIDC/mod_auth_openidc/wiki/Keycloak
