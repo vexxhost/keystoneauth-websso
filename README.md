@@ -106,16 +106,7 @@ keystone configuration consists of the keystone.conf (as well as any domain-spec
 
 ### Configure /etc/keystone/keystone.conf
 
-If domain specific configs are enabled on the server then this section needs to be added to each OpenID enabled domain
-
-```ini
-[openid]
-claim_prefix = OIDC-
-remote_id_attribute = OIDC-sub
-
-```
-
-Also, http://localhost:9990 needs to be added as a "Trusted Dashboard"
+http://localhost:9990/auth/websso/ needs to be added as a "Trusted Dashboard"
 
 ```ini
 [federation]
