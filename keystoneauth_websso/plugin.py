@@ -25,7 +25,7 @@ import re
 from keystoneauth1 import _utils as utils
 from keystoneauth1.identity.v3 import federation
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from keystoneauth_openid import exceptions
+from keystoneauth_websso import exceptions
 from datetime import datetime
 
 _logger = utils.get_logger(__name__)

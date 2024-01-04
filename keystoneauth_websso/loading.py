@@ -15,7 +15,7 @@
 
 from keystoneauth1.loading._plugins.identity import v3
 from keystoneauth1.loading import opts
-from keystoneauth_openid import plugin
+from keystoneauth_websso import plugin
 
 class OpenIDConnect(v3.loading.BaseFederationLoader):
 

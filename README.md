@@ -3,6 +3,13 @@
 [![GitHub issues](https://img.shields.io/github/issues/vexxhost/keystoneauth-openid.svg)](https://github.com/vexxhost/keystoneauth-openid/issues)
 [![GitHub license](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://raw.githubusercontent.com/vexxhost/keystoneauth-openid/master/LICENSE)
 
+## Quick Reference
+1. [Installation](#installation)
+2. [Usage-CLI](#1-pass-as-command-line-option)
+3. [Usage-stackrc file](#2-add-to-stackrc-file)
+4. [Usage-clouds.yml](#3-add-to-cloudsyml)
+5. [Keystone server configuration](#keystone-server-config)
+
 This is an authentication plugin for OpenStack clients (namely for
 the [keystoneauth1](https://github.com/openstack/keystoneauth) library) which
 provides client support for authentication against an OpenStack Keystone server
@@ -10,11 +17,12 @@ configured to support OpenID Connect using Apache's
 [mod_auth_openidc](https://github.com/zmartzone/mod_auth_openidc), as described
 below.
 
-## Available plugins
+## Description
 
-### `v3openid` plugin
+### `v3websso` plugin
 
-This plugin will allow you to authenitcate with a keystone server that is configured to use `openid` as an auth option on `/etc/keystone/keystone.conf`
+This plugin will allow you to authenitcate with a keystone server that is
+configured to use `openid` as an auth option on `/etc/keystone/keystone.conf`
 
 ## Installation
 
@@ -30,17 +38,16 @@ Or clone the repo and install it:
 
 ## Usage
 
-### `v3openid` plugin
+### `v3websso` plugin
 
-You have to specify the `v3openid` in the `--os-auth-type`. The
-`<identity-provider>` and `<protocol>` must be provided by the OpenStack cloud
-provider.
+The `<identity-provider>` and `<protocol>` must be provided by the OpenStack
+cloud provider.
 
 #### 1. Pass as command line option
 - Unscoped token:
 
         openstack --os-auth-url https://keystone.example.org:5000/v3 \
-            --os-auth-type v3openid \
+            --os-auth-type v3websso \
             --os-identity-provider <identity-provider> \
             --os-protocol <protocol> \
             --os-identity-api-version 3 \
@@ -49,7 +56,7 @@ provider.
 - Scoped token:
 
         openstack --os-auth-url https://keystone.example.org:5000/v3 \
-            --os-auth-type v3openid \
+            --os-auth-type v3websso \
             --os-identity-provider <identity-provider> \
             --os-protocol <protocol> \
             --os-project-name <project> \
@@ -61,7 +68,7 @@ provider.
 #### 2. Add to stackrc file
 
 ```bash
-export OS_AUTH_TYPE=v3openid
+export OS_AUTH_TYPE=v3websso
 export OS_AUTH_URL=https://keystone.example.org:5000/v3
 export OS_IDENTITY_PROVIDER='<keystone-identity-provider>'
 export OS_PROTOCOL=openid
@@ -75,7 +82,7 @@ export OS_PROTOCOL=openid
     ```yaml
     clouds:
         my_cloud:
-            auth_type: v3openid
+            auth_type: v3websso
             auth_url: https://keystone.example.org:5000/v3
             identity_provider: <keystone-identity-provider>
             protocol: openid
@@ -86,7 +93,7 @@ export OS_PROTOCOL=openid
     ```yaml
     clouds:
         my_cloud:
-            auth_type: v3openid
+            auth_type: v3websso
             auth_url: https://keystone.example.org:5000/v3
             identity_provider: <keystone-identity-provider>
             protocol: openid
