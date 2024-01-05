@@ -28,12 +28,12 @@ configured to use `openid` as an auth option on `/etc/keystone/keystone.conf`
 
 Install it via pip:
 
-    pip install keystoneauth-openid
+    pip install keystoneauth-websso
 
 Or clone the repo and install it:
 
-    git clone https://github.com/vexxhost/keystoneauth-openid
-    cd keystoneauth-openid
+    git clone https://github.com/vexxhost/keystoneauth-websso
+    cd keystoneauth-websso
     pip install .
 
 ## Usage
