@@ -18,17 +18,19 @@
 import cgi
 import json
 import os
+import re
 import socket
 import webbrowser
-import re
+from datetime import datetime
+from http.server import BaseHTTPRequestHandler, HTTPServer
 
 from keystoneauth1 import _utils as utils
 from keystoneauth1.identity.v3 import federation
-from http.server import BaseHTTPRequestHandler, HTTPServer
+
 from keystoneauth_websso import exceptions
-from datetime import datetime
 
 _logger = utils.get_logger(__name__)
+
 
 class _ClientCallbackServer(HTTPServer):
     """HTTP server to handle the OpenID Connect callback to localhost.
@@ -50,6 +52,7 @@ class _ClientCallbackServer(HTTPServer):
         HTTPServer.server_bind(self)
         self.socket.settimeout(60)
 
+
 class _ClientCallbackHandler(BaseHTTPRequestHandler):
     """HTTP request handler for the OpenID Connect redirect callback.
 
@@ -60,6 +63,7 @@ class _ClientCallbackHandler(BaseHTTPRequestHandler):
     This class implements a request handler that will process a single request
     and store the obtained code into the server's 'code' attribute
     """
+
     def do_POST(self):
         """Handle a POST request and obtain an authorization code.
 
@@ -67,16 +71,18 @@ class _ClientCallbackHandler(BaseHTTPRequestHandler):
         cookies from the completed mod_auth_openid session
         """
         postvars = {}
-        #we specifically need the mod_auth_openidc cookies but we will pass store all headers for now
+        # we specifically need the mod_auth_openidc cookies but we will pass store all headers for now
 
         if self.headers:
 
             form = cgi.FieldStorage(
-                    fp=self.rfile,
-                    headers=self.headers,
-                    environ={'REQUEST_METHOD': 'POST',
-                            'CONTENT_TYPE': self.headers['Content-Type'],
-                            })
+                fp=self.rfile,
+                headers=self.headers,
+                environ={
+                    "REQUEST_METHOD": "POST",
+                    "CONTENT_TYPE": self.headers["Content-Type"],
+                },
+            )
 
             self.send_response(200)
             self.send_header("Content-type", "text/html")
@@ -85,7 +91,8 @@ class _ClientCallbackHandler(BaseHTTPRequestHandler):
                 b"<html><head><title>Authentication Status OK</title></head>"
                 b"<body><p>The authentication flow has been completed.</p>"
                 b"<p>You can close this window.</p>"
-                b"</body></html>")
+                b"</body></html>"
+            )
 
             for field in form.keys():
                 field_item = form[field]
@@ -93,7 +100,7 @@ class _ClientCallbackHandler(BaseHTTPRequestHandler):
                     # Regular Form Value
                     postvars[field] = form[field].value
 
-            self.server.token = postvars['token']
+            self.server.token = postvars["token"]
         else:
             self.send_response(501)
             self.send_header("Content-type", "text/html")
@@ -102,7 +109,9 @@ class _ClientCallbackHandler(BaseHTTPRequestHandler):
                 b"<html><head><title>Authentication Status Failed</title></head>"
                 b"<body><p>The authentication flow failed.</p>"
                 b"<p>You can close this window.</p>"
-                b"</body></html>")
+                b"</body></html>"
+            )
+
 
 def _wait_for_token(redirect_host, redirect_port):
     """Spawn an HTTP server and wait for the auth_token.
@@ -120,12 +129,12 @@ def _wait_for_token(redirect_host, redirect_port):
     """
     server_address = (redirect_host, redirect_port)
     try:
-        httpd = _ClientCallbackServer(server_address,
-                                      _ClientCallbackHandler)
+        httpd = _ClientCallbackServer(server_address, _ClientCallbackHandler)
     except socket.error:
-        _logger.error("Cannot spawn the callback server on port "
-                      "%s, please specify a different port." %
-                      redirect_port)
+        _logger.error(
+            "Cannot spawn the callback server on port "
+            "%s, please specify a different port." % redirect_port
+        )
         raise
 
     # This will trigger _ClientCallbackHandler
@@ -137,12 +146,20 @@ def _wait_for_token(redirect_host, redirect_port):
     else:
         raise exceptions.MissingToken
 
+
 class OpenIDConnect(federation.FederationBaseAuth):
     """Implementation for OpenID Connect authentication."""
-    def __init__(self, auth_url, identity_provider, protocol,
-                 redirect_host="localhost", redirect_port=9990,
-                 cache_path=os.environ.get('HOME') + '/.cache/',
-                 **kwargs):
+
+    def __init__(
+        self,
+        auth_url,
+        identity_provider,
+        protocol,
+        redirect_host="localhost",
+        redirect_port=9990,
+        cache_path=os.environ.get("HOME") + "/.cache/",
+        **kwargs
+    ):
         """The OpenID Connect plugin expects the following arguments.
 
         :param redirect_host: The hostname where the authorization request will
@@ -156,26 +173,32 @@ class OpenIDConnect(federation.FederationBaseAuth):
                               callback http server will bind to.
         :type redirect_port: int
         """
-        super(OpenIDConnect, self).__init__(auth_url, identity_provider, protocol, **kwargs)
+        super(OpenIDConnect, self).__init__(
+            auth_url, identity_provider, protocol, **kwargs
+        )
         self.cache_path = cache_path
         self.redirect_host = redirect_host
         self.redirect_port = int(redirect_port)
-        self.redirect_uri = "http://%s:%s/auth/websso/" % (self.redirect_host,
-                                              self.redirect_port)
+        self.redirect_uri = "http://%s:%s/auth/websso/" % (
+            self.redirect_host,
+            self.redirect_port,
+        )
 
     @property
     def federated_token_url(self):
         """URL where websso auth flow is started."""
-        host = self.auth_url.rstrip('/')
-        if not host.endswith('v3'):
-            host += '/v3'
+        host = self.auth_url.rstrip("/")
+        if not host.endswith("v3"):
+            host += "/v3"
         values = {
-            'host': host,
-            'identity_provider': self.identity_provider,
-            'protocol': self.protocol
+            "host": host,
+            "identity_provider": self.identity_provider,
+            "protocol": self.protocol,
         }
-        url = ("%(host)s/auth/OS-FEDERATION/identity_providers/"
-               "%(identity_provider)s/protocols/%(protocol)s/websso")
+        url = (
+            "%(host)s/auth/OS-FEDERATION/identity_providers/"
+            "%(identity_provider)s/protocols/%(protocol)s/websso"
+        )
         url = url % values
 
         return url
@@ -187,7 +210,9 @@ class OpenIDConnect(federation.FederationBaseAuth):
 
         :returns auth_token
         """
-        webbrowser.open(self.federated_token_url + "?origin=" + self.redirect_uri, new=0)
+        webbrowser.open(
+            self.federated_token_url + "?origin=" + self.redirect_uri, new=0
+        )
 
         return _wait_for_token(self.redirect_host, self.redirect_port)
 
@@ -201,17 +226,18 @@ class OpenIDConnect(federation.FederationBaseAuth):
             auth_response: response to a GET that includes keystone token metadata
         """
 
-        headers = {'X-Auth-Token': auth_token,
-            'X-Subject-Token': auth_token}
+        headers = {"X-Auth-Token": auth_token, "X-Subject-Token": auth_token}
 
-        return session.get(self.auth_url + '/auth/tokens', headers=headers, authenticated=False)
+        return session.get(
+            self.auth_url + "/auth/tokens", headers=headers, authenticated=False
+        )
 
     def get_unscoped_auth_ref(self, session):
         """Authenticate with OpenID Connect Identity Provider.
 
         This is a multi-step process:
 
-        1. Send user to a webbrowser to authenticate. User will be redirected to a 
+        1. Send user to a webbrowser to authenticate. User will be redirected to a
            local webserver so a auth_token can be captured
 
         2. Use the auth_token to get additional token metadata
@@ -254,7 +280,7 @@ class OpenIDConnect(federation.FederationBaseAuth):
         cache_path = self._get_cache_path()
 
         if os.path.exists(cache_path):
-            with open(cache_path, 'r', encoding='utf-8') as f:
+            with open(cache_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
             if not self._token_expired(data):
                 return data
@@ -264,7 +290,7 @@ class OpenIDConnect(federation.FederationBaseAuth):
         if not os.path.exists(self.cache_path):
             os.mkdirs(self.cache_path)
 
-        with open(self._get_cache_path(), 'w', encoding='utf-8') as f:
+        with open(self._get_cache_path(), "w", encoding="utf-8") as f:
             json.dump(data, f)
 
     def _get_cache_path(self):
@@ -276,7 +302,9 @@ class OpenIDConnect(federation.FederationBaseAuth):
 
     def get_cache_id(self):
         """slugifys the auth_url and identity provider for use as cache filename"""
-        return 'os-' + re.sub('[^A-Za-z0-9-]+', '-', self.auth_url + '-' + self.identity_provider)
+        return "os-" + re.sub(
+            "[^A-Za-z0-9-]+", "-", self.auth_url + "-" + self.identity_provider
+        )
 
     def _token_expired(self, data):
         """Check to see if the token is expired
@@ -289,8 +317,9 @@ class OpenIDConnect(federation.FederationBaseAuth):
         """
         _data = json.loads(data)
 
-        expiration = datetime.strptime(_data['body']['token']['expires_at'],
-                                       "%Y-%m-%dT%H:%M:%S.%fZ")
+        expiration = datetime.strptime(
+            _data["body"]["token"]["expires_at"], "%Y-%m-%dT%H:%M:%S.%fZ"
+        )
         now = datetime.now()
         if expiration < now:
             return True
