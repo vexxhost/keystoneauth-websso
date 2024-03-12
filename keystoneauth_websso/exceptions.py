@@ -15,8 +15,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-# from keystoneauth1 import auth_plugins
 from keystoneauth1 import exceptions
+
 
 class MissingOidcAuthorizationCode(exceptions.AuthPluginException):
     message = "Could not get an OpenID Connect authorization code."

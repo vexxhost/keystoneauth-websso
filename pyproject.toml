@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "keystoneauth-websso"
+version = "0.1.0"
+description = "WebSSO CLI support for OpenStack keystoneauth library"
+license = "Apache-2.0"
+readme = "README.md"
+repository = "https://github.com/vexxhost/keystoneauth-websso"
+authors = [
+    "Ed Timmons <ed@delsurf.com>",
+    "Jeremy Lee <jeremy.lee1664@gmail.com>"
+]
+classifiers = [
+    "Environment :: OpenStack",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: System Administrators",
+    "Operating System :: POSIX :: Linux"
+]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+keystoneauth1 = ">=5.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.plugins."keystoneauth1.plugin"]
+v3websso = "keystoneauth_websso.loading:OpenIDConnect"

@@ -1,0 +1,104 @@
+name: test
+
+on:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - "3.8"
+          - "3.9"
+          - "3.10"
+          - "3.11"
+          - "3.12"
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v3
+
+      - name: Install Poetry
+        run: pipx install poetry
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          cache: poetry
+          python-version: ${{ matrix.python-version }}
+
+      - name: Build package
+        run: poetry build
+
+  install:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        openstack-version:
+          - zed
+          - "2023.1"
+          - "2023.2"
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v3
+
+      - name: Install Poetry
+        run: pipx install poetry
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          cache: poetry
+          python-version: "3.8"
+
+      - name: Build package
+        run: poetry build
+
+      - name: Install package using constraints
+        run: pip install --constraint https://releases.openstack.org/constraints/upper/${{ matrix.openstack-version }} ./dist/*.whl
+
+  black:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v3
+
+      - name: Run "black"
+        uses: psf/black@stable
+
+  flake8:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install "flake8"
+        run: pipx install flake8
+
+      - name: Run "flake8"
+        uses: suo/flake8-github-action@releases/v1
+        with:
+          checkName: flake8
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  isort:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Run "isort"
+        uses: isort/isort-action@master
