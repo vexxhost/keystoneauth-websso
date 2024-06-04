@@ -293,6 +293,9 @@ class OpenIDConnect(federation.FederationBaseAuth):
         with open(self._get_cache_path(), "w", encoding="utf-8") as f:
             json.dump(data, f)
 
+        # Set file permissions after writing
+        os.chmod(self._get_cache_path(), 0o600)
+
     def _get_cache_path(self):
         """Retrieve the location of the session cache
 
