@@ -288,7 +288,7 @@ class OpenIDConnect(federation.FederationBaseAuth):
     def put_cached_data(self, data):
         """Write cache data to file"""
         if not os.path.exists(self.cache_path):
-            os.mkdirs(self.cache_path)
+            os.makedirs(self.cache_path)
 
         with open(self._get_cache_path(), "w", encoding="utf-8") as f:
             json.dump(data, f)
