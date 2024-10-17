@@ -88,7 +88,8 @@ class _ClientCallbackHandler(BaseHTTPRequestHandler):
             self.send_header("Content-type", "text/html")
             self.end_headers()
             self.wfile.write(
-                b"<html><head><title>Authentication Status OK</title></head>"
+                b"<html><head><title>Authentication Status OK</title>"
+                b"<script>window.close()</script></head>"
                 b"<body><p>The authentication flow has been completed.</p>"
                 b"<p>You can close this window.</p>"
                 b"</body></html>"
