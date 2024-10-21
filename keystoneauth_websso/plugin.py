@@ -15,7 +15,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import cgi
 import json
 import os
 import re
@@ -24,6 +23,7 @@ import webbrowser
 from datetime import datetime
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
+import multipart
 from keystoneauth1 import _utils as utils
 from keystoneauth1.identity.v3 import federation
 
@@ -75,14 +75,13 @@ class _ClientCallbackHandler(BaseHTTPRequestHandler):
 
         if self.headers:
 
-            form = cgi.FieldStorage(
-                fp=self.rfile,
-                headers=self.headers,
-                environ={
-                    "REQUEST_METHOD": "POST",
-                    "CONTENT_TYPE": self.headers["Content-Type"],
-                },
-            )
+            environ = {
+                "REQUEST_METHOD": "POST",
+                "CONTENT_LENGTH": self.headers["Content-Length"],
+                "CONTENT_TYPE": self.headers["Content-Type"],
+                "wsgi.input": self.rfile,
+            }
+            forms, files = multipart.parse_form_data(environ)
 
             self.send_response(200)
             self.send_header("Content-type", "text/html")
@@ -95,11 +94,8 @@ class _ClientCallbackHandler(BaseHTTPRequestHandler):
                 b"</body></html>"
             )
 
-            for field in form.keys():
-                field_item = form[field]
-                if not field_item.filename:
-                    # Regular Form Value
-                    postvars[field] = form[field].value
+            for field, value in forms.items():
+                postvars[field] = value
 
             self.server.token = postvars["token"]
         else:
