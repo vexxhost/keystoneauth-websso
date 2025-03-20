@@ -20,7 +20,7 @@ import os
 import re
 import socket
 import webbrowser
-from datetime import datetime
+from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 import multipart
@@ -318,9 +318,9 @@ class OpenIDConnect(federation.FederationBaseAuth):
         _data = json.loads(data)
 
         expiration = datetime.strptime(
-            _data["body"]["token"]["expires_at"], "%Y-%m-%dT%H:%M:%S.%fZ"
+            _data["body"]["token"]["expires_at"], "%Y-%m-%dT%H:%M:%S.%f%z"
         )
-        now = datetime.now()
+        now = datetime.now(timezone.utc)
         if expiration < now:
             return True
         else:
