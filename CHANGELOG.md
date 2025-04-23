@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/vexxhost/keystoneauth-websso/compare/v0.2.0...v0.2.1) (2025-04-23)
+
+
+### Miscellaneous Chores
+
+* release 0.2.1 ([636cfd3](https://github.com/vexxhost/keystoneauth-websso/commit/636cfd308b190104c447028715a70e3d3b1086a2))
+
 ## [0.2.0](https://github.com/vexxhost/keystoneauth-websso/compare/v0.1.1...v0.2.0) (2024-10-21)
 
 
