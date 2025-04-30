@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.2.2](https://github.com/vexxhost/keystoneauth-websso/compare/v0.2.1...v0.2.2) (2025-04-30)
+
+
+### Bug Fixes
+
+* **deps:** update dependency keystoneauth1 to v5.10.0 ([6a44b7e](https://github.com/vexxhost/keystoneauth-websso/commit/6a44b7e9de1409d2506b937be803f33b69512362))
+* **deps:** update dependency keystoneauth1 to v5.10.0 ([1544dcc](https://github.com/vexxhost/keystoneauth-websso/commit/1544dcc190bedee6daab0716e6d0a1042051439a))
+* **deps:** update dependency multipart to v1.2.1 ([7090e45](https://github.com/vexxhost/keystoneauth-websso/commit/7090e457113c84ca2c713296d7ab7c7ec9666cd1))
+* **deps:** update dependency multipart to v1.2.1 ([fb72ce4](https://github.com/vexxhost/keystoneauth-websso/commit/fb72ce4db033ae7110c430d46c28c26fb4ae4db2))
+
 ## [0.2.1](https://github.com/vexxhost/keystoneauth-websso/compare/v0.2.0...v0.2.1) (2025-04-23)
 
 
