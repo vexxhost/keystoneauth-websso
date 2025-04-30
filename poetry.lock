@@ -138,20 +138,20 @@ files = [
 
 [[package]]
 name = "keystoneauth1"
-version = "5.6.0"
+version = "5.8.1"
 description = "Authentication Library for OpenStack Identity"
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "keystoneauth1-5.6.0-py3-none-any.whl", hash = "sha256:d740843afcf9c159fb929004eee1eecf46573236901e9d8ca2dca5694733a379"},
-    {file = "keystoneauth1-5.6.0.tar.gz", hash = "sha256:ecb7f34759ebe103db372ab0953c0b821929ddd497f332aa6b3ef6caacffed88"},
+    {file = "keystoneauth1-5.8.1-py3-none-any.whl", hash = "sha256:5bfe83b035633f6a2f7d0dbb33ccb41fd9c68b8418f7895fe8bedbf613753d99"},
+    {file = "keystoneauth1-5.8.1.tar.gz", hash = "sha256:0e971790315958c9be111cec1cc43275d051eca0b9cff4ce08e5f58331af465b"},
 ]
 
 [package.dependencies]
 iso8601 = ">=0.1.11"
 os-service-types = ">=1.2.0"
-pbr = ">=2.0.0,<2.1.0 || >2.1.0"
+pbr = ">=2.0.0"
 requests = ">=2.14.2"
 stevedore = ">=1.20.0"
 
@@ -160,7 +160,7 @@ betamax = ["betamax (>=0.7.0)", "fixtures (>=3.0.0)", "mock (>=2.0.0)"]
 kerberos = ["requests-kerberos (>=0.8.0)"]
 oauth1 = ["oauthlib (>=0.6.2)"]
 saml2 = ["lxml (>=4.2.0)"]
-test = ["PyYAML (>=3.12)", "bandit (>=1.7.6,<1.8.0)", "betamax (>=0.7.0)", "coverage (>=4.0,!=4.4)", "fixtures (>=3.0.0)", "flake8-docstrings (>=1.7.0,<1.8.0)", "flake8-import-order (>=0.18.2,<0.19.0)", "hacking (>=6.1.0,<6.2.0)", "lxml (>=4.2.0)", "oauthlib (>=0.6.2)", "oslo.config (>=5.2.0)", "oslo.utils (>=3.33.0)", "oslotest (>=3.2.0)", "reno (>=3.1.0)", "requests-kerberos (>=0.8.0)", "requests-mock (>=1.2.0)", "stestr (>=1.0.0)", "testresources (>=2.0.0)", "testtools (>=2.2.0)"]
+test = ["PyYAML (>=3.12)", "bandit (>=1.7.6,<1.8.0)", "betamax (>=0.7.0)", "coverage (>=4.0)", "fixtures (>=3.0.0)", "flake8-docstrings (>=1.7.0,<1.8.0)", "flake8-import-order (>=0.18.2,<0.19.0)", "hacking (>=6.1.0,<6.2.0)", "lxml (>=4.2.0)", "oauthlib (>=0.6.2)", "oslo.config (>=5.2.0)", "oslo.utils (>=3.33.0)", "oslotest (>=3.2.0)", "requests-kerberos (>=0.8.0)", "requests-mock (>=1.2.0)", "stestr (>=1.0.0)", "testresources (>=2.0.0)", "testtools (>=2.2.0)"]
 
 [[package]]
 name = "multipart"
