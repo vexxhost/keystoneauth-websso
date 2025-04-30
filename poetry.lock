@@ -164,18 +164,19 @@ test = ["PyYAML (>=3.12)", "bandit (>=1.7.6,<1.8.0)", "betamax (>=0.7.0)", "cove
 
 [[package]]
 name = "multipart"
-version = "1.1.0"
+version = "1.2.1"
 description = "Parser for multipart/form-data"
 optional = false
-python-versions = ">=3.5"
+python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "multipart-1.1.0-py3-none-any.whl", hash = "sha256:5a784677de8b49e6409e730dfe018f73c5d7aef360e44750e00f67d669b51e91"},
-    {file = "multipart-1.1.0.tar.gz", hash = "sha256:ee32683f5c454740cd9139e1d6057053823da0729c426f156464f81111529ba1"},
+    {file = "multipart-1.2.1-py3-none-any.whl", hash = "sha256:c03dc203bc2e67f6b46a599467ae0d87cf71d7530504b2c1ff4a9ea21d8b8c8c"},
+    {file = "multipart-1.2.1.tar.gz", hash = "sha256:829b909b67bc1ad1c6d4488fcdc6391c2847842b08323addf5200db88dbe9480"},
 ]
 
 [package.extras]
 dev = ["build", "pytest", "pytest-cov", "twine"]
+docs = ["sphinx (>=8,<9)", "sphinx-autobuild"]
 
 [[package]]
 name = "os-service-types"
