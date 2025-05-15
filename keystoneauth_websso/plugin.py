@@ -154,7 +154,7 @@ class OpenIDConnect(federation.FederationBaseAuth):
         protocol,
         redirect_host="localhost",
         redirect_port=9990,
-        cache_path=os.environ.get("HOME") + "/.cache/",
+        cache_path=os.path.expanduser("~") + "/.cache/",
         **kwargs
     ):
         """The OpenID Connect plugin expects the following arguments.
