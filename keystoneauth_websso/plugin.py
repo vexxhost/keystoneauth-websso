@@ -26,6 +26,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 import multipart
 from keystoneauth1 import _utils as utils
 from keystoneauth1.identity.v3 import federation
+from platformdirs import user_cache_dir
 
 from keystoneauth_websso import exceptions
 
@@ -154,7 +155,7 @@ class OpenIDConnect(federation.FederationBaseAuth):
         protocol,
         redirect_host="localhost",
         redirect_port=9990,
-        cache_path=os.environ.get("HOME") + "/.cache/",
+        cache_path=user_cache_dir(),
         **kwargs
     ):
         """The OpenID Connect plugin expects the following arguments.
