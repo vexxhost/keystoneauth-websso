@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "keystoneauth-websso"
-version = "0.2.2"
+version = "0.2.3"
 description = "WebSSO CLI support for OpenStack keystoneauth library"
 license = "Apache-2.0"
 readme = "README.md"
@@ -20,6 +20,7 @@ classifiers = [
 python = "^3.8"
 keystoneauth1 = ">=5.0.0"
 multipart = ">=1.0.0"
+platformdirs = ">=2.5.2"
 
 [build-system]
 requires = ["poetry-core"]
