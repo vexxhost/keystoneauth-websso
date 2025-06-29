@@ -224,11 +224,13 @@ class OpenIDConnect(federation.FederationBaseAuth):
             auth_response: response to a GET that includes keystone token metadata
         """
 
+        host = self.auth_url.rstrip("/")
+        if not host.endswith("v3"):
+            host += "/v3"
+
         headers = {"X-Auth-Token": auth_token, "X-Subject-Token": auth_token}
 
-        return session.get(
-            self.auth_url + "/auth/tokens", headers=headers, authenticated=False
-        )
+        return session.get(host + "/auth/tokens", headers=headers, authenticated=False)
 
     def get_unscoped_auth_ref(self, session):
         """Authenticate with OpenID Connect Identity Provider.
