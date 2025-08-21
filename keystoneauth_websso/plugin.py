@@ -16,12 +16,12 @@
 # under the License.
 
 import json
-import os
 import re
 import socket
 import webbrowser
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from pathlib import Path
 
 import multipart
 from keystoneauth1 import _utils as utils
@@ -174,7 +174,7 @@ class OpenIDConnect(federation.FederationBaseAuth):
         super(OpenIDConnect, self).__init__(
             auth_url, identity_provider, protocol, **kwargs
         )
-        self.cache_path = cache_path
+        self.cache_path = Path(cache_path)
         self.redirect_host = redirect_host
         self.redirect_port = int(redirect_port)
         self.redirect_uri = "http://%s:%s/auth/websso/" % (
@@ -279,29 +279,30 @@ class OpenIDConnect(federation.FederationBaseAuth):
         """Get cached token"""
         cache_path = self._get_cache_path()
 
-        if os.path.exists(cache_path):
-            with open(cache_path, "r", encoding="utf-8") as f:
+        if cache_path.exists():
+            with cache_path.open("r", encoding="utf-8") as f:
                 data = json.load(f)
             if not self._token_expired(data):
                 return data
 
     def put_cached_data(self, data):
         """Write cache data to file"""
-        if not os.path.exists(self.cache_path):
-            os.makedirs(self.cache_path)
+        if not self.cache_path.exists():
+            self.cache_path.mkdir(parents=True)
 
-        with open(self._get_cache_path(), "w", encoding="utf-8") as f:
+        cache_path = self._get_cache_path()
+        with cache_path.open("w", encoding="utf-8") as f:
             json.dump(data, f)
 
         # Set file permissions after writing
-        os.chmod(self._get_cache_path(), 0o600)
+        cache_path.chmod(0o600)
 
-    def _get_cache_path(self):
+    def _get_cache_path(self) -> Path:
         """Retrieve the location of the session cache
 
         :returns a string of the path for the appropriate cache file
         """
-        return self.cache_path + self.get_cache_id()
+        return self.cache_path / self.get_cache_id()
 
     def get_cache_id(self):
         """slugifys the auth_url and identity provider for use as cache filename"""
