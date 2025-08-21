@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.2.5](https://github.com/vexxhost/keystoneauth-websso/compare/v0.2.4...v0.2.5) (2025-08-21)
+
+
+### Bug Fixes
+
+* cache is being stored in the incorrect location ([230f608](https://github.com/vexxhost/keystoneauth-websso/commit/230f608f7b3421da0d673a5465c19d6b268a75d4))
+* cache is being stored in the incorrect location ([c4ab9dd](https://github.com/vexxhost/keystoneauth-websso/commit/c4ab9ddbef4ce642d75ffd478b7bd74c7a43a8fe))
+* **deps:** update dependency multipart to v1.3.0 ([9981ed8](https://github.com/vexxhost/keystoneauth-websso/commit/9981ed8e0938be3a9c42208b96bd1640563a95c8))
+* **deps:** update dependency multipart to v1.3.0 ([53f2061](https://github.com/vexxhost/keystoneauth-websso/commit/53f206105d36e4fcef9967cecd65a109295f04ce))
+
 ## [0.2.4](https://github.com/vexxhost/keystoneauth-websso/compare/v0.2.3...v0.2.4) (2025-07-23)
 
 
