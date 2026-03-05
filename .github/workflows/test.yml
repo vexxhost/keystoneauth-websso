@@ -16,6 +16,11 @@ jobs:
           - "3.11"
           - "3.12"
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
+        with:
+          egress-policy: audit
+
       - name: Checkout project
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
@@ -41,6 +46,11 @@ jobs:
           - "2023.1"
           - "2023.2"
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
+        with:
+          egress-policy: audit
+
       - name: Checkout project
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
@@ -62,15 +72,25 @@ jobs:
   black:
     runs-on: ubuntu-latest
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
+        with:
+          egress-policy: audit
+
       - name: Checkout project
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Run "black"
-        uses: psf/black@stable
+        uses: psf/black@6305bf1ae645ab7541be4f5028a86239316178eb # stable
 
   flake8:
     runs-on: ubuntu-latest
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
+        with:
+          egress-policy: audit
+
       - name: Checkout project
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
@@ -83,7 +103,7 @@ jobs:
         run: pipx install flake8
 
       - name: Run "flake8"
-        uses: suo/flake8-github-action@releases/v1
+        uses: suo/flake8-github-action@3e87882219642e01aa8a6bbd03b4b0adb8542c2a # releases/v1
         with:
           checkName: flake8
         env:
@@ -92,6 +112,11 @@ jobs:
   isort:
     runs-on: ubuntu-latest
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
+        with:
+          egress-policy: audit
+
       - name: Checkout project
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
@@ -101,4 +126,4 @@ jobs:
           python-version: "3.13"
 
       - name: Run "isort"
-        uses: isort/isort-action@master
+        uses: isort/isort-action@754522c780bf51012c35d6e3b47a52e3900a8ed4 # master
