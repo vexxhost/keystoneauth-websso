@@ -81,7 +81,7 @@ jobs:
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Run "black"
-        uses: psf/black@6305bf1ae645ab7541be4f5028a86239316178eb # stable
+        uses: psf/black@cbbbf64d2aefbd5797580e60e918fa6a21edca3e # stable
 
   flake8:
     runs-on: ubuntu-latest
