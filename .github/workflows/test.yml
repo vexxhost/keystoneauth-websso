@@ -61,7 +61,7 @@ jobs:
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           cache: poetry
-          python-version: "3.13"
+          python-version: "3.14"
 
       - name: Build package
         run: poetry build
@@ -97,7 +97,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
-          python-version: "3.13"
+          python-version: "3.14"
 
       - name: Install "flake8"
         run: pipx install flake8
@@ -123,7 +123,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
-          python-version: "3.13"
+          python-version: "3.14"
 
       - name: Run "isort"
         uses: isort/isort-action@754522c780bf51012c35d6e3b47a52e3900a8ed4 # master
