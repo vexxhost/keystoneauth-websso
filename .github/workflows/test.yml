@@ -126,4 +126,4 @@ jobs:
           python-version: "3.14"
 
       - name: Run "isort"
-        uses: isort/isort-action@754522c780bf51012c35d6e3b47a52e3900a8ed4 # master
+        uses: isort/isort-action@f8b020d137a888583a410435694c269075ef9e92 # master
