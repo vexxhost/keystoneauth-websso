@@ -169,14 +169,14 @@ test = ["PyYAML (>=3.12)", "bandit (>=1.7.6,<1.8.0)", "betamax (>=0.7.0)", "cove
 
 [[package]]
 name = "multipart"
-version = "1.3.1"
+version = "1.3.2"
 description = "Parser for multipart/form-data"
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "multipart-1.3.1-py3-none-any.whl", hash = "sha256:a82b59e1befe74d3d30b3d3f70efd5a2eba4d938f845dcff9faace968888ff29"},
-    {file = "multipart-1.3.1.tar.gz", hash = "sha256:211d7cfc1a7a43e75c4d24ee0e8e0f4f61d522f1a21575303ae85333dea687bf"},
+    {file = "multipart-1.3.2-py3-none-any.whl", hash = "sha256:434e3760a1548adcdf2e02f0042425e9877338e095c67965a6a3735a5c16c9b1"},
+    {file = "multipart-1.3.2.tar.gz", hash = "sha256:10a06d76a3d07bcc6034a4f11700047102c92d7ce35cff4015a326f2178e8f93"},
 ]
 
 [package.extras]
